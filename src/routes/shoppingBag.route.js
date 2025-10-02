@@ -1,53 +1,52 @@
-const express = require("express");
-const ShoppingBagController = require("../controllers/shoppingBag.controller.js");
+const express = require('express');
 
 class ShoppingBagRoute {
   constructor(app) {
     this.router = express.Router();
-    this.controller = new ShoppingBagController(); // instancia correctamente la clase
-    this.registerRoutes();
-    app.use("/shopping-bag", this.router);
+    this.registerMockRoutes();
+    app.use("/shopping-bag", this.router); // 🔹 más simple
   }
 
-  registerRoutes() {
-    this.router.delete("/clear/:user_id", (req, res) => {
-      try {
-        this.controller.clearBag(req, res);
-      } catch (err) {
-        console.error("Error al limpiar la bolsa del usuario: ", err);
-      }
-    });
-
+  registerMockRoutes() {
+    // Simular agregar producto
     this.router.post("/", (req, res) => {
-      try {
-        this.controller.addToBag(req, res);
-      } catch (err) {
-        console.error("Error al agregar producto a la bolsa: ", err);
-      }
+      res.json({
+        message: "Producto agregado a la bolsa",
+        item: {
+          user_id: req.body.user_id || "fake-user-123",
+          producto_talla_color_id: req.body.producto_talla_color_id || 99,
+          cantidad: req.body.cantidad || 1
+        }
+      });
     });
 
+    // Simular obtener bolsa de un usuario
     this.router.get("/:user_id", (req, res) => {
-      try {
-        this.controller.getBagByUser(req, res);
-      } catch (err) {
-        console.error("Error al obtener la bolsa del usuario: ", err);
-      }
+      res.json([
+        { producto_talla_color_id: 101, cantidad: 2 },
+        { producto_talla_color_id: 202, cantidad: 1 }
+      ]);
     });
 
-    this.router.put("/:user_id/:producto_talla_color_id", (req, res) => {
-      try {
-        this.controller.updateBagItem(req, res);
-      } catch (err) {
-        console.error("Error al actualizar producto de la bolsa: ", err);
-      }
+    // Simular actualizar producto
+    this.router.put("/:user_id/:product_id", (req, res) => {
+      res.json({
+        message: "Cantidad actualizada",
+        item: {
+          producto_talla_color_id: req.params.product_id,
+          cantidad: req.body.cantidad
+        }
+      });
     });
 
+    // Simular eliminar producto
     this.router.delete("/:user_id/:producto_talla_color_id", (req, res) => {
-      try {
-        this.controller.removeFromBag(req, res);
-      } catch (err) {
-        console.error("Error al eliminar producto de la bolsa: ", err);
-      }
+      res.json({ message: "Producto eliminado de la bolsa" });
+    });
+
+    // Simular vaciar bolsa
+    this.router.delete("/clear/:user_id", (req, res) => {
+      res.json({ message: `Bolsa del usuario ${req.params.user_id} vaciada` });
     });
   }
 }

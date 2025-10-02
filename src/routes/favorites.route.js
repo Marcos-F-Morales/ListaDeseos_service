@@ -1,76 +1,40 @@
 const express = require('express');
-const FavoritesController = require('../controllers/favorites.controller');
 
 class FavoritesRoute {
   constructor(app) {
     this.router = express.Router();
-    this.controller = new FavoritesController();
-    this.registerRoutes();
-    app.use("/favorites", this.router); // Ajusté la ruta base
+    this.registerMockRoutes();
+    app.use("/favorites", this.router);
   }
 
-  registerRoutes() {
-    // Vaciar lista de favoritos
-    this.router.delete("/clear/:user_id", (req, res) => {
-      try {
-        this.controller.clearFavorites(req, res);
-      } catch (err) {
-        console.error("Error al limpiar la lista de favoritos del usuario:  ", err);
-      }
-    });
-
-    // Agregar producto a favoritos
+  registerMockRoutes() {
+    // Agregar favorito
     this.router.post("/", (req, res) => {
-      try {
-        this.controller.addToFavorites(req, res);
-      } catch (err) {
-        console.error("Error al agregar un producto a favoritos:  ", err);
-      }
+      res.json({
+        message: "Producto agregado a favoritos",
+        item: {
+          user_id: req.body.user_id || "fake-user-123",
+          producto_id: req.body.producto_id || 555
+        }
+      });
     });
 
-    // Obtener lista de favoritos de un usuario
+    // Obtener favoritos
     this.router.get("/:user_id", (req, res) => {
-      try {
-        this.controller.getFavoritesByUser(req, res);
-      } catch (err) {
-        console.error("Error al obtener la lista de favoritos del usuario:  ", err);
-      }
+      res.json([
+        { producto_id: 111, nombre: "Zapatillas rojas" },
+        { producto_id: 222, nombre: "Camisa azul" }
+      ]);
     });
 
-    // Eliminar producto específico de favoritos
-    this.router.delete("/:user_id/:producto_talla_color_id", (req, res) => {
-      try {
-        this.controller.removeFromFavorites(req, res);
-      } catch (err) {
-        console.error("Error al eliminar un producto de favoritos:  ", err);
-      }
+    // Eliminar favorito
+    this.router.delete("/:user_id/:producto_id", (req, res) => {
+      res.json({ message: `Producto ${req.params.producto_id} eliminado de favoritos` });
     });
 
-    // Compartir lista de favoritos
-    this.router.post("/share/:userId", (req, res) => {
-      try {
-        this.controller.postUrlShare(req, res);
-      } catch (err) {
-        console.error("Error al compartir favoritos:  ", err);
-      }
-    });
-
-    // Revocar link compartido
-    this.router.post("/revoke/:userId", (req, res) => {
-      try {
-        this.controller.revokeShareLink(req, res);
-      } catch (err) {
-        console.error("Error al revocar link de favoritos:  ", err);
-      }
-    });
-
-    // Obtener lista compartida públicamente
-    this.router.get("/shared/:shareId", (req, res) => {
-      try {
-        this.controller.getSharedFavoritesPublic(req, res);
-      } catch (err) {
-        console.error("Error al obtener favoritos compartidos públicamente:  ", err);
-      }
+    // Vaciar favoritos
+    this.router.delete("/clear/:user_id", (req, res) => {
+      res.json({ message: `Todos los favoritos del usuario ${req.params.user_id} fueron eliminados` });
     });
   }
 }
